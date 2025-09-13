@@ -1,0 +1,35 @@
+# ----------------------------
+# Python (backend)
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+
+# Virtual environments
+venv/
+.env
+
+# Jupyter notebooks
+.ipynb_checkpoints
+
+# Data / models (optional)
+*.csv
+*.h5
+*.pkl
+*.joblib
+*.model
+
+# ----------------------------
+# System
+# ----------------------------
+.DS_Store
+*.swp
+*.swo
+
+# ----------------------------
+# Node (frontend)
+# ----------------------------
+frontend/node_modules/
+frontend/build/
