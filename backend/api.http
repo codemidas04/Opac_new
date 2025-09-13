@@ -1,0 +1,112 @@
+### Health check
+GET http://127.0.0.1:5000/
+
+### Prediction request
+POST http://127.0.0.1:5000/predict
+Content-Type: application/json
+
+{
+  "Status": "A11",
+  "Duration": 6,
+  "CreditHistory": "A34",
+  "Purpose": "A43",
+  "CreditAmount": 1169,
+  "Savings": "A65",
+  "Employment": "A75",
+  "InstallmentRate": 4,
+  "PersonalStatusSex": "A93",
+  "OtherDebtors": "A101",
+  "ResidenceDuration": 4,
+  "Property": "A121",
+  "Age": 67,
+  "OtherInstallmentPlans": "A143",
+  "Housing": "A151",
+  "ExistingCredits": 2,
+  "Job": "A173",
+  "LiableDependents": 1,
+  "Telephone": "A192",
+  "ForeignWorker": "A201"
+}
+
+### Bad Credit Prediction
+POST http://127.0.0.1:5000/predict
+Content-Type: application/json
+
+{
+  "Status": "A14",
+  "Duration": 60,
+  "CreditHistory": "A30",
+  "Purpose": "A40",
+  "CreditAmount": 20000,
+  "Savings": "A65",
+  "Employment": "A71",
+  "InstallmentRate": 4,
+  "PersonalStatusSex": "A95",
+  "OtherDebtors": "A103",
+  "ResidenceDuration": 1,
+  "Property": "A124",
+  "Age": 20,
+  "OtherInstallmentPlans": "A143",
+  "Housing": "A152",
+  "ExistingCredits": 4,
+  "Job": "A174",
+  "LiableDependents": 2,
+  "Telephone": "A191",
+  "ForeignWorker": "A202"
+}
+
+### Health check
+GET http://127.0.0.1:5000/health
+Accept: application/json
+
+### Missing fields test (Duration & Age removed on purpose)
+POST http://127.0.0.1:5000/predict
+Content-Type: application/json
+
+{
+  "Status": "A11",
+  "CreditHistory": "A30",
+  "Purpose": "A40",
+  "CreditAmount": 2000,
+  "Savings": "A61",
+  "Employment": "A71",
+  "InstallmentRate": 4,
+  "PersonalStatusSex": "A93",
+  "OtherDebtors": "A101",
+  "ResidenceDuration": 3,
+  "Property": "A121",
+  "OtherInstallmentPlans": "A141",
+  "Housing": "A151",
+  "ExistingCredits": 1,
+  "Job": "A171",
+  "LiableDependents": 1,
+  "Telephone": "A191",
+  "ForeignWorker": "A201"
+}
+
+### Explain Prediction
+POST http://127.0.0.1:5000/explain
+Content-Type: application/json
+
+{
+  "Status": "A30",
+  "Duration": 60,
+  "CreditHistory": "A30",
+  "Purpose": "A40",
+  "CreditAmount": 18000,
+  "Savings": "A65",
+  "Employment": "A71",
+  "InstallmentRate": 4,
+  "PersonalStatusSex": "A93",
+  "OtherDebtors": "A101",
+  "ResidenceDuration": 1,
+  "Property": "A124",
+  "Age": 19,
+  "OtherInstallmentPlans": "A143",
+  "Housing": "A152",
+  "ExistingCredits": 3,
+  "Job": "A174",
+  "LiableDependents": 2,
+  "Telephone": "A192",
+  "ForeignWorker": "A202"
+}
