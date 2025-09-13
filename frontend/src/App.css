@@ -1,0 +1,99 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.credit-form {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.credit-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  color: #2c3e50;
+}
+
+.credit-form label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  font-size: 0.95rem;
+}
+
+.credit-form input,
+.credit-form select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fafafa;
+  transition: border 0.2s ease-in-out;
+}
+
+.credit-form input:focus,
+.credit-form select:focus {
+  border-color: #007bff;
+  outline: none;
+  background: #fff;
+}
+
+.credit-form button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #007bff;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.credit-form button:hover {
+  background: #0056b3;
+}
+
+.result-card {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  transition: transform 0.2s ease-in-out;
+}
+
+.result-card:hover {
+  transform: translateY(-3px);
+}
+
+.result-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.result-card.good {
+  background-color: #e6ffed;
+  border: 1px solid #4caf50;
+  color: #256029;
+}
+
+.result-card.bad {
+  background-color: #ffeaea;
+  border: 1px solid #f44336;
+  color: #7a1f1f;
+}
