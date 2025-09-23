@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -17,6 +17,7 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier
 import joblib
+from datetime import datetime
 
 from load_data import load_german_credit
 
@@ -26,8 +27,16 @@ from load_data import load_german_credit
 parser = argparse.ArgumentParser(description="Train Credit Risk Model")
 parser.add_argument("--threshold", type=float, default=0.5,
                     help="Decision threshold for classifying Bad Credit (default 0.5)")
+parser.add_argument("--skip-tuning", action="store_true",
+                    help="Skip hyperparameter tuning and use last known best params")
 args = parser.parse_args()
 chosen_threshold = args.threshold
+
+# -----------------------------
+# Results directory
+# -----------------------------
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
+os.makedirs(RESULTS_DIR, exist_ok=True)
 
 # -----------------------------
 # Load & preprocess data
@@ -46,33 +55,71 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-model = Pipeline(steps=[
+# -----------------------------
+# Train / Test split
+# -----------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# -----------------------------
+# Build pipeline
+# -----------------------------
+pipeline = Pipeline(steps=[
     ("preprocessor", preprocessor),
-    ("classifier", XGBClassifier(
+    ("clf", XGBClassifier(
         random_state=42,
         eval_metric="logloss"
     ))
 ])
 
 # -----------------------------
-# Train / Test split & fit
+# Hyperparameter tuning
 # -----------------------------
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+if not args.skip_tuning:
+    print("\n🔍 Running hyperparameter tuning (RandomizedSearchCV)...")
 
-print("Training model...")
+    param_dist = {
+        "clf__n_estimators": [100, 200, 300],
+        "clf__max_depth": [3, 4, 5, 6],
+        "clf__learning_rate": [0.01, 0.05, 0.1, 0.2],
+        "clf__subsample": [0.7, 0.8, 1.0],
+        "clf__colsample_bytree": [0.7, 0.8, 1.0],
+        "clf__gamma": [0, 1, 5],
+    }
+
+    search = RandomizedSearchCV(
+        pipeline,
+        param_distributions=param_dist,
+        n_iter=10,
+        scoring="f1",
+        cv=3,
+        n_jobs=-1,
+        verbose=1,
+        random_state=42
+    )
+
+    search.fit(X_train, y_train)
+    model = search.best_estimator_
+    print(f"\n✅ Best XGBoost Params: {search.best_params_}")
+
+else:
+    print("\n⏩ Skipping tuning, using default XGBoost...")
+    model = pipeline
+    model.fit(X_train, y_train)
+
+# -----------------------------
+# Predictions
+# -----------------------------
+print("\nTraining model...")
 model.fit(X_train, y_train)
 print("Training complete.")
 
-# -----------------------------
-# Predicted probabilities & default predictions (0.5)
-# -----------------------------
 y_proba = model.predict_proba(X_test)[:, 1]    # probability of class "Bad Credit"
 y_pred_default = (y_proba >= 0.5).astype(int)
 
 # -----------------------------
-# Metrics at default threshold = 0.5
+# Metrics at default threshold
 # -----------------------------
 acc = accuracy_score(y_test, y_pred_default)
 prec = precision_score(y_test, y_pred_default, zero_division=0)
@@ -92,7 +139,7 @@ print("\nClassification Report (Default):")
 print(classification_report(y_test, y_pred_default, target_names=["Good Credit", "Bad Credit"], zero_division=0))
 
 # -----------------------------
-# Metrics at tuned threshold (CLI arg)
+# Metrics at tuned threshold
 # -----------------------------
 y_pred_tuned = (y_proba >= chosen_threshold).astype(int)
 acc_t = accuracy_score(y_test, y_pred_tuned)
@@ -113,12 +160,12 @@ print(classification_report(y_test, y_pred_tuned, target_names=["Good Credit", "
 # -----------------------------
 # ROC + Precision-Recall plots
 # -----------------------------
-fpr, tpr, roc_thresholds = roc_curve(y_test, y_proba)
+fpr, tpr, _ = roc_curve(y_test, y_proba)
 roc_auc_val = auc(fpr, tpr)
 
-precisions, recalls, pr_thresholds = precision_recall_curve(y_test, y_proba)
+precisions, recalls, _ = precision_recall_curve(y_test, y_proba)
 
-# compute point for chosen_threshold (use confusion matrix-based point)
+# Compute point for chosen_threshold
 cm_tuned = confusion_matrix(y_test, y_pred_tuned)
 tn, fp, fn, tp = cm_tuned.ravel()
 fpr_tuned = fp / (fp + tn) if (fp + tn) > 0 else 0.0
@@ -126,7 +173,6 @@ tpr_tuned = tp / (tp + fn) if (tp + fn) > 0 else 0.0
 prec_tuned = precision_score(y_test, y_pred_tuned, zero_division=0)
 rec_tuned = recall_score(y_test, y_pred_tuned, zero_division=0)
 
-# Plot side-by-side
 plt.figure(figsize=(12, 5))
 
 # ROC
@@ -149,7 +195,13 @@ plt.title("Precision-Recall Curve")
 plt.legend(loc="lower left")
 
 plt.tight_layout()
-plt.show()
+
+# Save plots to results/
+ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+plot_path = os.path.join(RESULTS_DIR, f"train_curves_{ts}.png")
+plt.savefig(plot_path, dpi=300)
+print(f"\n📊 Saved ROC & PR curves to {plot_path}")
+plt.show(block=False)
 
 # -----------------------------
 # Save model
