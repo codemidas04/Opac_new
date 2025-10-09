@@ -1,23 +1,29 @@
 import pandas as pd
 
-# Define column names based on german.doc (UCI documentation)
+# Define column names (consistent with EDA + preprocessing.py)
 columns = [
-    "Status", "Duration", "CreditHistory", "Purpose", "CreditAmount",
-    "Savings", "Employment", "InstallmentRate", "PersonalStatusSex",
-    "OtherDebtors", "ResidenceDuration", "Property", "Age",
-    "OtherInstallmentPlans", "Housing", "ExistingCredits",
-    "Job", "LiableDependents", "Telephone", "ForeignWorker", "Target"
+    "Status_of_existing_checking_account", "Duration_in_month", "Credit_history",
+    "Purpose", "Credit_amount", "Savings_account/bonds",
+    "Present_employment_since", "Installment_rate_in_percentage_of_disposable_income",
+    "Personal_status_and_sex", "Other_debtors/guarantors",
+    "Present_residence_since", "Property", "Age_in_years",
+    "Other_installment_plans", "Housing", "Number_of_existing_credits_at_this_bank",
+    "Job", "Number_of_people_being_liable_to_provide_maintenance_for",
+    "Telephone", "Foreign_worker", "Credit_risk"
 ]
 
 def load_german_credit():
-    # Load dataset
-    df = pd.read_csv("german.data", 
-                     sep="\s+",  
-                     header=None, 
-                     names=columns)
+    df = pd.read_csv(
+        "german.data",
+        sep="\s+",
+        header=None,
+        names=columns
+    )
+    # Add standardized target column
+    df["target"] = df["Credit_risk"].map({1: 0, 2: 1})
     return df
 
 if __name__ == "__main__":
     data = load_german_credit()
-    print(data.head())   # preview first 5 rows
+    print(data.head())
     print("\nShape of dataset:", data.shape)

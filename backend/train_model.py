@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
@@ -20,6 +18,7 @@ import joblib
 from datetime import datetime
 
 from load_data import load_german_credit
+from preprocessing import build_preprocessor   # <-- NEW
 
 # -----------------------------
 # CLI args
@@ -42,18 +41,14 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 # Load & preprocess data
 # -----------------------------
 df = load_german_credit()
-X = df.drop("Target", axis=1)
-y = df["Target"].map({1: 0, 2: 1})  # Good=0, Bad=1
 
-categorical_cols = X.select_dtypes(include=["object"]).columns.tolist()
-numeric_cols = X.select_dtypes(exclude=["object"]).columns.tolist()
+# ✅ Ensure target column name is consistent with your EDA
+# In EDA you created "target" (0=Good, 1=Bad)
+if "Target" in df.columns:
+    df.rename(columns={"Target": "target"}, inplace=True)
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-        ("num", "passthrough", numeric_cols),
-    ]
-)
+X = df.drop("target", axis=1)
+y = df["target"]
 
 # -----------------------------
 # Train / Test split
@@ -63,8 +58,10 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # -----------------------------
-# Build pipeline
+# Build pipeline (Preprocessor + XGB)
 # -----------------------------
+preprocessor = build_preprocessor()
+
 pipeline = Pipeline(steps=[
     ("preprocessor", preprocessor),
     ("clf", XGBClassifier(
