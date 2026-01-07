@@ -15,6 +15,7 @@ from load_data import load_german_credit, columns as ORIGINAL_COLUMNS
 import json
 from datetime import datetime
 
+
 # -------------------------
 # Utility helpers
 # -------------------------
@@ -373,54 +374,63 @@ with tab1:
         submitted = st.form_submit_button("🔮 Predict")
 
         if submitted:
-            # Build raw-data DataFrame with exact column names the pipeline expects
-            df_raw = pd.DataFrame([{
-                "Status_of_existing_checking_account": Status_map[Status_choice],
-                "Duration_in_month": Duration_in_month,
-                "Credit_history": CreditHistory_map[Credit_history_choice],
-                "Purpose": Purpose_map[Purpose_choice],
-                "Credit_amount": Credit_amount,
-                "Savings_account/bonds": Savings_map[Savings_choice],
-                "Present_employment_since": Employment_map[Present_employment_since],
-                "Personal_status_and_sex": PersonalStatus_map[Personal_status_and_sex],
-                "Other_debtors/guarantors": OtherDebtors_map[Other_debtors_choice],
-                "Property": Property_map[Property_choice],
-                "Age_in_years": Age_in_years,
-                "Other_installment_plans": OtherInstallments_map[Other_installment_plans_choice],
-                "Housing": Housing_map[Housing_choice],
-                "Job": Job_map[Job_choice],
-            }])
-            # keep backward compatibility if df_in is referenced elsewhere
-            df_in = df_raw
+           try:
+                
+              # --------------------------------------------------
+                # 1. Build RAW input (German dataset schema)
+                # --------------------------------------------------
+                df_raw = pd.DataFrame([{
+                    "Status_of_existing_checking_account": Status_map[Status_choice],
+                    "Duration_in_month": Duration_in_month,
+                    "Credit_history": CreditHistory_map[Credit_history_choice],
+                    "Purpose": Purpose_map[Purpose_choice],
+                    "Credit_amount": Credit_amount,
+                    "Savings_account/bonds": Savings_map[Savings_choice],
+                    "Present_employment_since": Employment_map[Present_employment_since],
+                    "Personal_status_and_sex": PersonalStatus_map[Personal_status_and_sex],
+                    "Other_debtors/guarantors": OtherDebtors_map[Other_debtors_choice],
+                    "Property": Property_map[Property_choice],
+                    "Age_in_years": Age_in_years,
+                    "Other_installment_plans": OtherInstallments_map[Other_installment_plans_choice],
+                    "Housing": Housing_map[Housing_choice],
+                    "Job": Job_map[Job_choice],
+                }])
 
-            # -----------------------------
-    # 2. Predict on RAW (THIS FIXES CLOUD)
-    # -----------------------------
-    try:
-        if hasattr(pipeline_ref, "predict_proba"):
-            proba = pipeline_ref.predict_proba(df_raw)[0][1]
-        else:
-            if preprocessor is None or classifier is None:
-                raise RuntimeError("Preprocessor or classifier not found inside pipeline object.")
-            Xt = preprocessor.transform(df_raw)
-            proba = classifier.predict_proba(Xt)[0][1]
+            # --------------------------------------------------
+            # 2. Compute ENGINEERED FEATURES (AS TRAINED)
+            # --------------------------------------------------
+                df_eng = compute_engineered_features(df_raw.copy())
 
-        label = "Bad Credit ❌" if proba >= threshold else "Good Credit ✅"
+            # --------------------------------------------------
+            # 3. Predict on ENGINEERED DATA
+            # --------------------------------------------------
+                if hasattr(pipeline_ref, "predict_proba"):
+                    proba = pipeline_ref.predict_proba(df_eng)[0][1]
+                else:
+                    if preprocessor is None or classifier is None:
+                        raise RuntimeError("Preprocessor or classifier not found inside pipeline object.")
+                    Xt = preprocessor.transform(df_eng)
+                    proba = classifier.predict_proba(Xt)[0][1]
 
-        st.session_state["proba"] = proba
-        st.session_state["pred_label"] = label
+                label = "Bad Credit ❌" if proba >= threshold else "Good Credit ✅"
 
-        # -----------------------------
-        # 3. Engineered copy ONLY for Explain tab
-        # -----------------------------
-        df_eng = compute_engineered_features(df_raw.copy())
-        st.session_state["input_df"] = df_eng
-        st.session_state["input_df_raw"] = df_raw
+                st.session_state["proba"] = proba
+                st.session_state["pred_label"] = label
 
-        st.success(f"Prediction: {label} — Risk Probability (Bad) = {proba:.3f}")
+            # --------------------------------------------------
+            # 4. Save for Explain tab
+            # --------------------------------------------------
+                st.session_state["input_df"] = df_eng
+                st.session_state["input_df_raw"] = df_raw
 
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+                st.success(f"Prediction: {label} — Risk Probability (Bad) = {proba:.3f}")
+
+           except Exception as e:
+                st.error(f"Prediction failed: {e}")
+            
+            
+
+            
 
     # Show available prediction (if any)
     if "pred_label" in st.session_state:
