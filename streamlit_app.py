@@ -374,7 +374,7 @@ with tab1:
 
         if submitted:
             # Build raw-data DataFrame with exact column names the pipeline expects
-            df_in = pd.DataFrame([{
+            df_raw = pd.DataFrame([{
                 "Status_of_existing_checking_account": Status_map[Status_choice],
                 "Duration_in_month": Duration_in_month,
                 "Credit_history": CreditHistory_map[Credit_history_choice],
@@ -390,29 +390,37 @@ with tab1:
                 "Housing": Housing_map[Housing_choice],
                 "Job": Job_map[Job_choice],
             }])
+            # keep backward compatibility if df_in is referenced elsewhere
+            df_in = df_raw
 
-            # Compute engineered features with helper (keeps logic centralized)
-            df_in = compute_engineered_features(df_in)
+            # -----------------------------
+    # 2. Predict on RAW (THIS FIXES CLOUD)
+    # -----------------------------
+    try:
+        if hasattr(pipeline_ref, "predict_proba"):
+            proba = pipeline_ref.predict_proba(df_raw)[0][1]
+        else:
+            if preprocessor is None or classifier is None:
+                raise RuntimeError("Preprocessor or classifier not found inside pipeline object.")
+            Xt = preprocessor.transform(df_raw)
+            proba = classifier.predict_proba(Xt)[0][1]
 
-            # Save for Explain tab
-            st.session_state["input_df"] = df_in
+        label = "Bad Credit ❌" if proba >= threshold else "Good Credit ✅"
 
-            # Predict using pipeline if possible, else transform -> classifier
-            try:
-                if hasattr(pipeline_ref, "predict_proba"):
-                    proba = pipeline_ref.predict_proba(df_in)[0][1]
-                else:
-                    # run through preprocessor then classifier
-                    if preprocessor is None or classifier is None:
-                        raise RuntimeError("Preprocessor or classifier not found inside pipeline object.")
-                    Xt = preprocessor.transform(df_in)
-                    proba = classifier.predict_proba(Xt)[0][1]
-                label = "Bad Credit ❌" if proba >= threshold else "Good Credit ✅"
-                st.session_state["proba"] = proba
-                st.session_state["pred_label"] = label
-                st.success(f"Prediction: {label} — Risk Probability (Bad) = {proba:.3f}")
-            except Exception as e:
-                st.error(f"Prediction failed: {e}")
+        st.session_state["proba"] = proba
+        st.session_state["pred_label"] = label
+
+        # -----------------------------
+        # 3. Engineered copy ONLY for Explain tab
+        # -----------------------------
+        df_eng = compute_engineered_features(df_raw.copy())
+        st.session_state["input_df"] = df_eng
+        st.session_state["input_df_raw"] = df_raw
+
+        st.success(f"Prediction: {label} — Risk Probability (Bad) = {proba:.3f}")
+
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
 
     # Show available prediction (if any)
     if "pred_label" in st.session_state:
