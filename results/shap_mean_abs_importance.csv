@@ -1,0 +1,64 @@
+feature_raw,feature_label,mean_abs_shap
+Status_of_existing_checking_account_A14,Checking: None,0.63768655
+credit_per_month,Credit per Month,0.48547602
+Credit_amount,Credit Amount,0.41978803
+credit_to_age,Credit-to-Age Ratio,0.35105535
+Duration_in_month,Duration (Months),0.2795593
+Credit_history_A34,History: Critical/Other Loans,0.27890715
+Status_of_existing_checking_account_A11,Checking: <0 DM,0.2503181
+Purpose_A40,Purpose: New Car,0.22601655
+Savings_account/bonds_A61,Savings: <100 DM,0.20257768
+Age_in_years,Age (Years),0.2010285
+Present_employment_since_A74,Employment: 4–7 yrs,0.17439552
+Purpose_A41,Purpose: Used Car,0.14822426
+Savings_account/bonds_A65,Savings: Unknown,0.13326557
+Other_installment_plans_A143,Installment: None,0.12931553
+Property_A121,Property: Real Estate,0.10512694
+Present_employment_since_A72,Employment: <1 yr,0.09344731
+Housing_A151,Housing: Rent,0.09050741
+age_bin_26-35,Age Bin: 26–35,0.08900623
+Personal_status_and_sex_A93,Male: Single,0.08193302
+Other_debtors/guarantors_A103,Debtors: Guarantor,0.0802889
+Purpose_A43,Purpose: Radio/TV,0.0802589
+Purpose_A46,Purpose: Education,0.07416837
+Property_A124,Property: None,0.073260374
+Other_installment_plans_A141,Installment: Bank,0.07025571
+Credit_history_A31,History: All Paid Duly,0.060226243
+Status_of_existing_checking_account_A13,Checking: ≥200 DM,0.057354502
+Credit_history_A32,History: Existing Paid (Delay),0.055178266
+Housing_A152,Housing: Own,0.05429188
+Property_A122,Property: Insurance,0.049030796
+Status_of_existing_checking_account_A12,Checking: 0–200 DM,0.04840904
+Job_A173,Job: Skilled,0.04690946
+Personal_status_and_sex_A92,Female: Single,0.045097727
+Credit_history_A30,History: No Credit Taken,0.043594494
+Present_employment_since_A75,Employment: ≥7 yrs,0.043466784
+Present_employment_since_A73,Employment: 1–4 yrs,0.041222155
+Job_A172,Job: Unskilled Resident,0.040334076
+Other_debtors/guarantors_A102,Debtors: Co-Applicant,0.03827351
+Savings_account/bonds_A64,Savings: ≥1000 DM,0.03651119
+Purpose_A42,Purpose: Furniture,0.035423942
+Property_A123,Property: Car (Other),0.03221471
+Personal_status_and_sex_A91,Male: Divorced/Separated,0.032133393
+age_bin_36-45,Age Bin: 36–45,0.02844596
+Purpose_A49,Purpose: Business,0.028260756
+Job_A174,Job: Highly Skilled,0.027625317
+age_bin_46-55,Age Bin: 46–55,0.027186409
+Credit_history_A33,History: Existing Paid (Other),0.026175607
+Savings_account/bonds_A62,Savings: 100–500 DM,0.023248345
+Present_employment_since_A71,Employment: Unemployed,0.02037256
+Savings_account/bonds_A63,Savings: 500–1000 DM,0.019505808
+Other_debtors/guarantors_A101,Debtors: None,0.018363778
+Other_installment_plans_A142,Installment: Stores,0.017790105
+Housing_A153,Housing: Free,0.017697167
+Personal_status_and_sex_A94,Male: Married/Widowed,0.012582448
+Purpose_A45,Purpose: Repairs,0.012321693
+age_bin_56-65,Age Bin: 56–65,0.0032955552
+Purpose_A410,Purpose: Other,0.0028055783
+Job_A171,Job: Unskilled Non-Resident,0.00038204395
+Purpose_A48,Purpose: Retraining,0.0
+Purpose_A44,Purpose: Appliances,0.0
+age_bin_18-25,Age Bin: 18–25,0.0
+log_duration_in_month,Log(Duration in Months),0.0
+log_credit_amount,Log(Credit Amount),0.0
+age_bin_65+,Age Bin: 65+,0.0
