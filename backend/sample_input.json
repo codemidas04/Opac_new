@@ -1,0 +1,22 @@
+{
+    "Status": "A11",
+    "Duration": 12,
+    "CreditHistory": "A34",
+    "Purpose": "A43",
+    "CreditAmount": 2500,
+    "Savings": "A65",
+    "Employment": "A75",
+    "InstallmentRate": 4,
+    "PersonalStatusSex": "A93",
+    "OtherDebtors": "A101",
+    "ResidenceDuration": 2,
+    "Property": "A121",
+    "Age": 35,
+    "OtherInstallmentPlans": "A143",
+    "Housing": "A152",
+    "ExistingCredits": 1,
+    "Job": "A173",
+    "LiableDependents": 1,
+    "Telephone": "A192",
+    "ForeignWorker": "A201"
+  }

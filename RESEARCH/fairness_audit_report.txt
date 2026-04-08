@@ -1,0 +1,9 @@
+FAIRNESS AUDIT REPORT (fairlearn)
+==================================================
+               approval_rate  accuracy
+Age_in_years                          
+Older (>= 25)       0.746181  0.937720
+Young (< 25)        0.610738  0.899329
+
+Demographic Parity Difference: 0.1354
+Demographic Parity Ratio (Disparate Impact): 0.8185

@@ -1,0 +1,14 @@
+{
+  "oof_auc": 0.7723190476190476,
+  "best_params": {
+    "n_estimators": 300,
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "gamma": 1,
+    "random_state": 42,
+    "use_label_encoder": false,
+    "eval_metric": "logloss"
+  }
+}
