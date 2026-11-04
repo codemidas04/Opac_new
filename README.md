@@ -67,27 +67,15 @@ The following diagram illustrates the complete end-to-end data flow, feature eng
 ## 🧮 Theoretical Formulation & Methodology
 
 ### 1. Domain-Specific Feature Engineering
-To capture nonlinear debt repayment friction without data leakage, custom transformers construct credit risk ratios:
+To capture non-linear debt repayment friction without data leakage, custom transformers construct domain-specific credit risk features:
 
-* **Debt Service Ratio (DSR):**
-$$
-\text{DSR} = \frac{\text{Credit Amount}}{\text{Loan Duration (Months)}}
-$$
-
-* **Capital-to-Age Ratio (CAR):**
-$$
-\text{CAR} = \frac{\text{Credit Amount}}{\text{Applicant Age (Years)}}
-$$
-
-* **Variance-Stabilizing Logarithmic Transforms:**
-$$
-z_{\text{amount}} = \ln(1 + \text{Credit Amount}), \quad z_{\text{duration}} = \ln(1 + \text{Duration})
-$$
-
-* **Non-linear Age Discretization:** Partitioning continuous age into regulatory cohorts:
-$$
-\text{AgeBin} \in \{[18, 25), [26, 35), [36, 45), [46, 55), [56, 65), [65, 100]\}
-$$
+| Engineered Risk Feature | Mathematical Formulation | Economic & Risk Interpretation |
+| :--- | :--- | :--- |
+| **Debt Service Ratio (DSR)** | `DSR = Credit Amount / Loan Duration` | Measures the monthly debt repayment strain relative to total requested term. |
+| **Capital-to-Age Ratio (CAR)** | `CAR = Credit Amount / Applicant Age` | Quantifies financial leverage and risk exposure relative to lifecycle earning maturity. |
+| **Log-Transformed Amount** | `log_amount = ln(1 + Credit Amount)` | Compresses heavy right-skewed tail distributions in requested capital. |
+| **Log-Transformed Duration** | `log_duration = ln(1 + Duration)` | Normalizes non-linear repayment friction across short vs. long loan terms. |
+| **Regulatory Age Cohorts** | `AgeBin ∈ [18–25, 26–35, ..., 65+]` | Discretizes continuous age into regulatory brackets to capture non-linear default likelihood. |
 
 ---
 
@@ -98,7 +86,7 @@ $$
 C(\text{FN}) \approx 4 \times C(\text{FP})
 $$
 
-Rather than using a default symmetric threshold ($\theta = 0.50$), OpacGuard applies an asymmetric decision threshold $\theta^* = 0.35$:
+Rather than using a default symmetric threshold (θ = 0.50), OpacGuard applies an asymmetric decision threshold θ* = 0.35:
 
 $$
 y^* = \mathbb{I}\left(P(y=1 \mid \mathbf{x}) \ge 0.35\right)
@@ -107,7 +95,7 @@ $$
 ---
 
 ### 3. FICO Credit Score Calibration
-To provide applicants and underwriters with standardized scoring, posterior default probabilities are scaled linearly to the standard FICO score interval $[300, 850]$:
+To provide applicants and underwriters with standardized scoring, posterior default probabilities are scaled linearly to the standard FICO score interval [300, 850]:
 
 $$
 \text{Score}_{\text{FICO}} = 850 - 550 \times P(y=1 \mid \mathbf{x})
@@ -116,29 +104,29 @@ $$
 ---
 
 ### 4. Game-Theoretic Feature Attribution (TreeSHAP)
-For tree ensemble model $f(\mathbf{x})$, local feature contributions $\phi_i(f, \mathbf{x})$ are computed via Shapley value formulation:
+For tree ensemble model f(x), local feature contributions ϕ_i(f, x) are computed via the Shapley value formulation:
 
 $$
 \phi_i(f, \mathbf{x}) = \sum_{S \subseteq \mathcal{F} \setminus \{i\}} \frac{|S|!(|\mathcal{F}| - |S| - 1)!}{|\mathcal{F}|!} \left[ f_x(S \cup \{i\}) - f_x(S) \right]
 $$
 
-where $\mathcal{F}$ represents the full set of engineered and one-hot encoded input variables.
+where F represents the full set of engineered and one-hot encoded input variables.
 
 ---
 
 ### 5. Algorithmic Recourse via Constrained Counterfactuals (DiCE)
-Adverse action notices require actionable recourse. Using Diverse Counterfactual Explanations, we minimize loss function $C(\mathbf{x}, \mathbf{c})$ to locate the closest perturbed vector $\mathbf{c}$ yielding approval ($\hat{y} = 0$):
+Adverse action notices require actionable recourse. Using Diverse Counterfactual Explanations, we minimize loss function C(x, c) to locate the closest perturbed vector c* yielding approval (y* = 0):
 
 $$
 \mathbf{c}^* = \arg\min_{\mathbf{c}} \text{dist}(\mathbf{x}, \mathbf{c}) + \lambda \left( f(\mathbf{c}) - 0 \right)^2
 $$
 
-subject to realistic feasibility bounds on mutable features: $\text{Duration} \in [6, 72]$ months and $\text{Amount} \in [250, 15000]$ DM.
+subject to realistic feasibility bounds on mutable features: Duration ∈ [6, 72] months and Amount ∈ [250, 15000] DM.
 
 ---
 
 ### 6. Algorithmic Fairness & Disparate Impact Formulation
-To audit age-related bias between protected classes (Sensitive attribute $A \in \{\text{Young } (<25), \text{Older } (\ge 25)\}$), Demographic Parity Difference ($DPD$) and Demographic Parity Ratio ($DPR$) are computed with favorable outcome $Y=0$ (Approval):
+To audit age-related bias between protected classes (Sensitive attribute Age: Young < 25 vs. Older ≥ 25), Demographic Parity Difference (DPD) and Demographic Parity Ratio (DPR) are computed with favorable outcome Y = 0 (Approval):
 
 $$
 DPR = \frac{P(\hat{Y} = 0 \mid A = \text{Young})}{P(\hat{Y} = 0 \mid A = \text{Older})}
@@ -166,13 +154,13 @@ Models were evaluated using 5-Fold Stratified Cross-Validation on held-out test 
 | **XGBoost (Tuned @ θ = 0.50)** | **0.78** | 0.66 | 0.52 | 0.58 | 0.78 | Stratified CV optimal parameters |
 | **OpacGuard XGBoost (Tuned @ θ = 0.35)** | 0.74 | 0.56 | **0.67** | **0.61** | 0.78 | **Production Operating Point (+15% recall)** |
 
-> **Key Observation:** Transitioning to the cost-sensitive threshold $\theta = 0.35$ increases default detection recall by $+15.0\%$ absolute ($52\% \rightarrow 67\%$), mitigating the highest source of bank financial risk with minimal impact on overall accuracy.
+> **Key Observation:** Transitioning to the cost-sensitive threshold θ = 0.35 increases default detection recall by +15.0% absolute (52% → 67%), mitigating the highest source of bank financial risk with minimal impact on overall accuracy.
 
 ---
 
 ### 2. Algorithmic Fairness Audit Findings (`fairlearn`)
 
-An algorithmic fairness audit was conducted on the sensitive attribute `Age` ($< 25$ vs. $\ge 25$):
+An algorithmic fairness audit was conducted on the sensitive attribute **Age** (< 25 vs. ≥ 25):
 
 | Protected Demographic Cohort | Sample Size (N) | Approval Rate | Empirical Accuracy |
 | :--- | :---: | :---: | :---: |
@@ -181,7 +169,7 @@ An algorithmic fairness audit was conducted on the sensitive attribute `Age` ($<
 
 * **Demographic Parity Difference (DPD):** `0.1354`
 * **Demographic Parity Ratio (DPR / Disparate Impact):** **`0.8185`**
-* **Regulatory Compliance Verdict:** **PASSED.** The model achieves a disparate impact ratio of $81.85\%$, successfully clearing the regulatory $80\%$ Four-Fifths threshold ($0.8185 \ge 0.80$).
+* **Regulatory Compliance Verdict:** **PASSED.** The model achieves a disparate impact ratio of **81.85%**, successfully clearing the regulatory 80% Four-Fifths threshold (0.8185 ≥ 0.80).
 
 ---
 
@@ -341,14 +329,16 @@ This research and software framework was designed and executed at the Department
 
 | Author | Academic & Engineering Role | Individual Research & Implementation Contributions |
 | :--- | :--- | :--- |
-| **Aditya Sanjay Manjalkar** | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Literature Survey & Problem Formulation:** Conducted comprehensive review of credit risk scoring literature, algorithmic transparency mandates (ECOA, FCRA, EU AI Act), and identified the research gap in cost-sensitive XAI for consumer lending.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
-| **Prof. Shweta Sharma** | **Faculty Research Supervisor**<br>*(Assistant Professor)* | • **Research Supervision:** Provided primary academic mentorship, methodology validation, and project oversight.<br>• **Regulatory Standards:** Advised on algorithmic fairness criteria (EEOC Four-Fifths compliance) and financial compliance frameworks.<br>• **Manuscript Editing:** Guided research paper preparation, peer-review revisions, and journal publication submission. |
-| **Chirag Ashok Mendon** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines under the lead architect's direction.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
-| **Chaitanya Rajesh Lade** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression) under the lead architect's direction.<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+| **Aditya Sanjay Manjalkar**<br>[adityamanjalkar-cmpn@atharvacoe.ac.in](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in) | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Literature Survey & Problem Formulation:** Conducted comprehensive review of credit risk scoring literature, algorithmic transparency mandates (ECOA, FCRA, EU AI Act), and identified the research gap in cost-sensitive XAI for consumer lending.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
+| **Prof. Shweta Sharma**<br>[shwetasharma@atharvacoe.ac.in](mailto:shwetasharma@atharvacoe.ac.in) | **Faculty Research Supervisor**<br>*(Assistant Professor)* | • **Research Supervision:** Provided primary academic mentorship, methodology validation, and project oversight.<br>• **Regulatory Standards:** Advised on algorithmic fairness criteria (EEOC Four-Fifths compliance) and financial compliance frameworks.<br>• **Manuscript Editing:** Guided research paper preparation, peer-review revisions, and journal publication submission. |
+| **Chirag Ashok Mendon**<br>[chiragmendon-cmpn@atharvacoe.ac.in](mailto:chiragmendon-cmpn@atharvacoe.ac.in) | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines under the lead architect's direction.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+| **Chaitanya Rajesh Lade**<br>[chaitanyalade-cmpn@atharvacoe.ac.in](mailto:chaitanyalade-cmpn@atharvacoe.ac.in) | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression) under the lead architect's direction.<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
 
 > **Contact & Correspondence:**
-> * **Aditya Sanjay Manjalkar (Lead Author):** [adityamanjalkar-cmpn@atharvacoe.ac.in](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in)
-> * **Prof. Shweta Sharma (Research Supervisor):** [shwetasharma@atharvacoe.ac.in](mailto:shwetasharma@atharvacoe.ac.in)
+> * **Aditya Sanjay Manjalkar (Lead Author & Architect):** [adityamanjalkar-cmpn@atharvacoe.ac.in](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in)
+> * **Prof. Shweta Sharma (Faculty Supervisor):** [shwetasharma@atharvacoe.ac.in](mailto:shwetasharma@atharvacoe.ac.in)
+> * **Chirag Ashok Mendon (Co-Author):** [chiragmendon-cmpn@atharvacoe.ac.in](mailto:chiragmendon-cmpn@atharvacoe.ac.in)
+> * **Chaitanya Rajesh Lade (Co-Author):** [chaitanyalade-cmpn@atharvacoe.ac.in](mailto:chaitanyalade-cmpn@atharvacoe.ac.in)
 
 ---
 
