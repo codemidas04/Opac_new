@@ -58,35 +58,9 @@ Credit risk assessment is historically dominated by either oversimplified linear
 
 The following diagram illustrates the complete end-to-end data flow, feature engineering, modeling, interpretability, and MLOps governance layers:
 
-```mermaid
-flowchart TD
-    subgraph S1 [1. Data Pipeline]
-        A[German Credit Dataset] --> B[Target Encoding: 0 vs 1]
-        B --> C[Feature Engineering: DSR, CAR, Bins]
-        C --> D[ColumnTransformer Pipeline]
-    end
-
-    subgraph S2 [2. Model Optimization]
-        D --> E[Stratified 5-Fold CV]
-        E --> F[Tuned XGBoost Classifier]
-        F --> G[Threshold Tuning: θ = 0.35]
-        G --> H[Artifact: credit_model.pkl]
-    end
-
-    subgraph S3 [3. XAI & Governance]
-        H --> I[TreeSHAP Engine]
-        H --> J[DiCE Recourse Solver]
-        H --> K[Fairlearn Audit: DPR 0.8185]
-        H --> L[Evidently AI Drift Monitor]
-    end
-
-    subgraph S4 [4. Cloud Deployment]
-        I --> M[Streamlit Cloud Platform]
-        J --> M
-        K --> M
-        L --> M
-    end
-```
+<p align="center">
+  <img src="results/system_architecture.png" alt="OpacGuard System & Governance Architecture" width="100%">
+</p>
 
 ---
 
@@ -215,14 +189,9 @@ An algorithmic fairness audit was conducted on the sensitive attribute `Age` ($<
 
 The web dashboard (`streamlit_app.py`) provides an interactive interface across five specialized enterprise modules:
 
-```mermaid
-flowchart LR
-    App[OpacGuard Core] --> M1[Module 1: Risk Scoring]
-    App --> M2[Module 2: SHAP Attribution]
-    App --> M3[Module 3: Policy Simulator]
-    App --> M4[Module 4: Actionable Recourse]
-    App --> M5[Module 5: MLOps & Governance]
-```
+<p align="center">
+  <img src="results/decision_platform.png" alt="OpacGuard Production Decision Platform" width="100%">
+</p>
 
 ### Module Technical Specifications
 
@@ -372,7 +341,7 @@ This research and software framework was designed and executed at the Department
 
 | Author | Academic & Engineering Role | Individual Research & Implementation Contributions |
 | :--- | :--- | :--- |
-| **Aditya Sanjay Manjalkar** | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
+| **Aditya Sanjay Manjalkar** | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Literature Survey & Problem Formulation:** Conducted comprehensive review of credit risk scoring literature, algorithmic transparency mandates (ECOA, FCRA, EU AI Act), and identified the research gap in cost-sensitive XAI for consumer lending.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
 | **Prof. Shweta Sharma** | **Faculty Research Supervisor**<br>*(Assistant Professor)* | • **Research Supervision:** Provided primary academic mentorship, methodology validation, and project oversight.<br>• **Regulatory Standards:** Advised on algorithmic fairness criteria (EEOC Four-Fifths compliance) and financial compliance frameworks.<br>• **Manuscript Editing:** Guided research paper preparation, peer-review revisions, and journal publication submission. |
 | **Chirag Ashok Mendon** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines under the lead architect's direction.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
 | **Chaitanya Rajesh Lade** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression) under the lead architect's direction.<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
