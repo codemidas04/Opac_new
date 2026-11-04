@@ -1,6 +1,7 @@
 # OpacGuard: An Explainable Machine Learning Framework for Credit Risk Prediction
 
 <p align="center">
+  <a href="https://opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app/"><img src="https://img.shields.io/badge/Live%20Demo-Streamlit%20Cloud-FF4B4B.svg?style=flat&logo=streamlit&logoColor=white" alt="Live Demo"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%20%7C%203.12-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python"></a>
   <a href="https://streamlit.io/"><img src="https://img.shields.io/badge/Streamlit-1.42+-FF4B4B.svg?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"></a>
   <a href="https://xgboost.readthedocs.io/"><img src="https://img.shields.io/badge/XGBoost-2.0+-EB5424.svg?style=flat" alt="XGBoost"></a>
@@ -9,6 +10,10 @@
   <a href="https://fairlearn.org/"><img src="https://img.shields.io/badge/Audit-Fairlearn%20(EEOC)-brightgreen.svg?style=flat" alt="Fairlearn"></a>
   <a href="https://www.evidentlyai.com/"><img src="https://img.shields.io/badge/MLOps-Evidently%20AI-blueviolet.svg?style=flat" alt="Evidently AI"></a>
   <img src="https://img.shields.io/badge/Peer--Reviewed-IJTE%20%2F%20ISTE-success.svg?style=flat" alt="Publication">
+</p>
+
+<p align="center">
+  <a href="https://opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app/"><strong>🚀 Launch Live Interactive Decision Platform on Streamlit Cloud »</strong></a>
 </p>
 
 ---
@@ -175,6 +180,9 @@ An algorithmic fairness audit was conducted on the sensitive attribute **Age** (
 
 ## 🖥 Production Decision Platform (Streamlit UI)
 
+> 🌐 **Live Web Application:** The complete OpacGuard enterprise platform is actively hosted and accessible at:  
+> 👉 **[opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app](https://opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app/)**
+
 The web dashboard (`streamlit_app.py`) provides an interactive interface across five specialized enterprise modules:
 
 <p align="center">
@@ -281,7 +289,7 @@ pip install -r requirements.txt
 ```bash
 streamlit run streamlit_app.py
 ```
-Access the local dashboard at: `http://localhost:8501`
+Access the local dashboard at: `http://localhost:8501` (or access the live cloud deployment directly at [opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app](https://opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app/)).
 
 ### 5. Execute Research Scripts
 ```bash
@@ -316,7 +324,7 @@ pytest tests/
 
 ## ☁️ Deployment Architecture (Streamlit Cloud)
 
-OpacGuard is engineered for zero-cold-start cloud deployment:
+OpacGuard is live in production and publicly accessible at **[opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app](https://opacnew-9yd2wxw8bdloy7f3vwedda.streamlit.app/)**. The application is engineered for zero-cold-start cloud deployment:
 1. **Self-Contained Artifacts:** The pre-trained pipeline (`credit_model.pkl`) and SHAP importance mappings (`results/shap_mean_abs_importance.csv`) are tracked via Git LFS / repository tracking, eliminating cloud memory spikes caused by training on container spin-up.
 2. **Defensive Path Resolution:** `model_artifact.py` utilizes hierarchical path resolution to guarantee flawless pipeline discovery across local, Dockerized, and Streamlit Community Cloud environments.
 3. **In-Memory Caching:** Heavy computational graphs (Pipeline instantiation, DiCE background reference sampling) are isolated behind `@st.cache_resource`, ensuring sub-second inference latency for real-time risk decisioning.
