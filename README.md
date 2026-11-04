@@ -60,45 +60,32 @@ The following diagram illustrates the complete end-to-end data flow, feature eng
 
 ```mermaid
 flowchart TD
-    subgraph Data_Pipeline [1. Data Preprocessing & Feature Engineering]
-        A["Statlog German Credit Dataset<br/>(1,000 Records, 20 Raw Features)"]
-        B["Target Standardization<br/>(0: Low Risk, 1: High Risk)"]
-        C["Domain Feature Engineering<br/>(DSR, CAR, Logs, Age Bins)"]
-        D["Scikit-Learn ColumnTransformer<br/>(Median Imputer + One-Hot Encoder)"]
-        A --> B --> C --> D
+    subgraph S1 [1. Data Pipeline]
+        A[German Credit Dataset] --> B[Target Encoding: 0 vs 1]
+        B --> C[Feature Engineering: DSR, CAR, Bins]
+        C --> D[ColumnTransformer Pipeline]
     end
 
-    subgraph Model_Engine [2. Cost-Sensitive Model Optimization]
-        E["Stratified 5-Fold Cross-Validation<br/>(Hyperparameter Search)"]
-        F["XGBoost Ensemble Classifier<br/>(Cost-Sensitive Objective)"]
-        G["Threshold Optimization<br/>(Optimal Operating Point θ = 0.35)"]
-        H["credit_model.pkl<br/>(Serialized Pipeline Artifact)"]
-        E --> F --> G --> H
+    subgraph S2 [2. Model Optimization]
+        D --> E[Stratified 5-Fold CV]
+        E --> F[Tuned XGBoost Classifier]
+        F --> G[Threshold Tuning: θ = 0.35]
+        G --> H[Artifact: credit_model.pkl]
     end
 
-    subgraph Governance_Layer [3. Explainability, Recourse & Governance]
-        direction TB
-        subgraph Sub_XAI [Interpretability & Recourse]
-            I["TreeSHAP Engine<br/>(Attribution Waterfalls)"]
-            J["Actionable Recourse Engine<br/>(DiCE Counterfactuals)"]
-            I --> J
-        end
-        subgraph Sub_Audit [Regulatory Compliance & Auditing]
-            K["Fairlearn Fairness Audit<br/>(Disparate Impact: 0.8185)"]
-            L["Evidently AI Telemetry<br/>(Inflation Drift Monitor)"]
-            K --> L
-        end
+    subgraph S3 [3. XAI & Governance]
+        H --> I[TreeSHAP Engine]
+        H --> J[DiCE Recourse Solver]
+        H --> K[Fairlearn Audit: DPR 0.8185]
+        H --> L[Evidently AI Drift Monitor]
     end
 
-    subgraph Production_Layer [4. Production Deployment Layer]
-        M["Streamlit Enterprise Decision Dashboard<br/>(streamlit_app.py Cloud Deployment)"]
+    subgraph S4 [4. Cloud Deployment]
+        I --> M[Streamlit Cloud Platform]
+        J --> M
+        K --> M
+        L --> M
     end
-
-    D --> E
-    H --> Sub_XAI
-    H --> Sub_Audit
-    Sub_XAI --> M
-    Sub_Audit --> M
 ```
 
 ---
@@ -230,12 +217,22 @@ The web dashboard (`streamlit_app.py`) provides an interactive interface across 
 
 ```mermaid
 flowchart LR
-    App["<b>OpacGuard Core</b><br/>Decision Engine"] --> M1["<b>Module 1: Credit Risk Scoring</b><br/>• Interactive Applicant Input Form<br/>• Calibrated Default Probability P(Default)<br/>• Real-Time FICO Gauge Chart (300–850)"]
-    App --> M2["<b>Module 2: SHAP Attribution</b><br/>• Local Applicant Waterfall Plots<br/>• Top Feature Impact Rankings<br/>• Bivariate SHAP Dependence Plots"]
-    App --> M3["<b>Module 3: Policy Simulator</b><br/>• CRO Dynamic Risk Tolerance Slider<br/>• Real-Time Plotly Bullet Chart vs Policy<br/>• Risk Regime (Conservative / Growth / Lax)"]
-    App --> M4["<b>Module 4: Actionable Recourse</b><br/>• 6 Financial Optimization Heuristics<br/>• 12-Month Score Recovery Trajectory<br/>• Downloadable Adverse Action Plan (.TXT)<br/>• Exact DiCE Mathematical Counterfactuals"]
-    App --> M5["<b>Module 5: MLOps & Governance</b><br/>• Fairlearn Disparate Impact Audit Report<br/>• Evidently AI Macroeconomic Drift Report<br/>• Exportable SHAP PDF & Telemetry Data"]
+    App[OpacGuard Core] --> M1[Module 1: Risk Scoring]
+    App --> M2[Module 2: SHAP Attribution]
+    App --> M3[Module 3: Policy Simulator]
+    App --> M4[Module 4: Actionable Recourse]
+    App --> M5[Module 5: MLOps & Governance]
 ```
+
+### Module Technical Specifications
+
+| Module | Core Functionality | Primary KPIs & Visualizations | Technical Implementation |
+| :--- | :--- | :--- | :--- |
+| **1. Credit Risk Scoring** | Real-time borrower default risk prediction and credit score conversion | • Decision Label (Approved / Denied)<br>• Calibrated Risk Probability P(Default)<br>• Plotly FICO Score Gauge (300–850)<br>• Dynamic Risk Tier (Poor, Fair, Good, Excellent) | Evaluates engineered features against the serialized XGBoost pipeline; maps probability linearly to FICO scale: Score = 850 - 550 · P(Default). |
+| **2. SHAP Attribution Engine** | Local and global game-theoretic model explainability | • Single-applicant SHAP waterfall plot<br>• Top feature impact bar charts<br>• Interactive bivariate SHAP dependence plots with background cohort | Uses `shap.TreeExplainer` on the transformed feature matrix with human-readable feature label mapping (`shap_mean_abs_importance.csv`). |
+| **3. Enterprise Policy Simulator** | Dynamic executive policy threshold stress-testing | • Chief Risk Officer (CRO) threshold slider (0.10 to 0.90)<br>• Plotly Bullet Chart comparing applicant risk against company policy<br>• Real-time policy regime indicator (Conservative / Balanced / Aggressive) | Re-classifies active applicant in real-time under modified risk tolerance thresholds without retraining or latency. |
+| **4. Actionable Recourse & Recs** | What-if simulation, adverse action guidance, and exact counterfactuals | • 6 ranked financial optimization levers with estimated FICO gains (+pts)<br>• 12-month exponential score recovery trajectory curve<br>• Live parameter sliders (Loan Amount, Duration)<br>• Downloadable Adverse Action Plan report (.TXT)<br>• Exact DiCE mathematical counterfactuals | Dual-engine architecture: heuristic rule evaluator testing loan cuts, duration shortening, and liquidity boosts, coupled with `dice_ml` randomized counterfactual optimizer. |
+| **5. MLOps Admin & Compliance** | Regulatory compliance auditing, disparate impact analysis, and macroeconomic drift | • Embedded Fairlearn Demographic Parity audit report<br>• Embedded Evidently AI interactive HTML data drift report<br>• Downloadable SHAP PDF report, CSV mappings, and applicant profiles | Audits age bias (< 25 vs ≥ 25) verifying EEOC Four-Fifths compliance (DPR = 0.8185); detects distribution shifts under simulated 25% inflation stress. |
 
 ---
 
@@ -377,8 +374,8 @@ This research and software framework was designed and executed at the Department
 | :--- | :--- | :--- |
 | **Aditya Sanjay Manjalkar** | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
 | **Prof. Shweta Sharma** | **Faculty Research Supervisor**<br>*(Assistant Professor)* | • **Research Supervision:** Provided primary academic mentorship, methodology validation, and project oversight.<br>• **Regulatory Standards:** Advised on algorithmic fairness criteria (EEOC Four-Fifths compliance) and financial compliance frameworks.<br>• **Manuscript Editing:** Guided research paper preparation, peer-review revisions, and journal publication submission. |
-| **Chirag Ashok Mendon** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
-| **Chaitanya Rajesh Lade** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression).<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+| **Chirag Ashok Mendon** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines under the lead architect's direction.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+| **Chaitanya Rajesh Lade** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression) under the lead architect's direction.<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
 
 > **Contact & Correspondence:**
 > * **Aditya Sanjay Manjalkar (Lead Author):** [adityamanjalkar-cmpn@atharvacoe.ac.in](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in)
