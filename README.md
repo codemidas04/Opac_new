@@ -61,31 +61,44 @@ The following diagram illustrates the complete end-to-end data flow, feature eng
 ```mermaid
 flowchart TD
     subgraph Data_Pipeline [1. Data Preprocessing & Feature Engineering]
-        A[Statlog German Credit Dataset: 1000 Records] --> B[Target Standardization: 0 Low Risk, 1 High Risk]
-        B --> C[Domain Feature Engineering: DSR, CAR, Logs, Bins]
-        C --> D[Scikit-Learn ColumnTransformer Pipeline]
+        A["Statlog German Credit Dataset<br/>(1,000 Records, 20 Raw Features)"]
+        B["Target Standardization<br/>(0: Low Risk, 1: High Risk)"]
+        C["Domain Feature Engineering<br/>(DSR, CAR, Logs, Age Bins)"]
+        D["Scikit-Learn ColumnTransformer<br/>(Median Imputer + One-Hot Encoder)"]
+        A --> B --> C --> D
     end
 
-    subgraph Model_Optimization [2. Cost-Sensitive Model Optimization]
-        D --> E[Stratified 5-Fold Cross Validation]
-        E --> F[XGBoost Classifier with Hyperparameter Tuning]
-        F --> G[Threshold Tuning: Operating Point θ = 0.35]
-        G --> H[Serialized Pipeline Artifact: credit_model.pkl]
+    subgraph Model_Engine [2. Cost-Sensitive Model Optimization]
+        E["Stratified 5-Fold Cross-Validation<br/>(Hyperparameter Search)"]
+        F["XGBoost Ensemble Classifier<br/>(Cost-Sensitive Objective)"]
+        G["Threshold Optimization<br/>(Optimal Operating Point θ = 0.35)"]
+        H["credit_model.pkl<br/>(Serialized Pipeline Artifact)"]
+        E --> F --> G --> H
     end
 
     subgraph Governance_Layer [3. Explainability, Recourse & Governance]
-        H --> I[TreeSHAP Attribution Engine]
-        H --> J[Actionable Recourse Engine: DiCE Counterfactuals]
-        H --> K[Fairlearn Audit: Demographic Parity Ratio = 0.8185]
-        H --> L[Evidently AI Macroeconomic Drift Telemetry]
+        direction TB
+        subgraph Sub_XAI [Interpretability & Recourse]
+            I["TreeSHAP Engine<br/>(Attribution Waterfalls)"]
+            J["Actionable Recourse Engine<br/>(DiCE Counterfactuals)"]
+            I --> J
+        end
+        subgraph Sub_Audit [Regulatory Compliance & Auditing]
+            K["Fairlearn Fairness Audit<br/>(Disparate Impact: 0.8185)"]
+            L["Evidently AI Telemetry<br/>(Inflation Drift Monitor)"]
+            K --> L
+        end
     end
 
-    subgraph Production_Deployment [4. Enterprise Production Layer]
-        I --> M[Streamlit Decision Dashboard]
-        J --> M
-        K --> M
-        L --> M
+    subgraph Production_Layer [4. Production Deployment Layer]
+        M["Streamlit Enterprise Decision Dashboard<br/>(streamlit_app.py Cloud Deployment)"]
     end
+
+    D --> E
+    H --> Sub_XAI
+    H --> Sub_Audit
+    Sub_XAI --> M
+    Sub_Audit --> M
 ```
 
 ---
@@ -213,21 +226,15 @@ An algorithmic fairness audit was conducted on the sensitive attribute `Age` ($<
 
 ## 🖥 Production Decision Platform (Streamlit UI)
 
-The web dashboard (`streamlit_app.py`) provides an interactive interface across five specialized modules:
+The web dashboard (`streamlit_app.py`) provides an interactive interface across five specialized enterprise modules:
 
 ```mermaid
-flowchart TD
-    App[OpacGuard Decision Platform] --> Tab1[Module 1: Real-Time Risk Scoring]
-    App --> Tab2[Module 2: SHAP Attribution Engine]
-    App --> Tab3[Module 3: Enterprise Policy Simulator]
-    App --> Tab4[Module 4: Actionable Recourse & Recs]
-    App --> Tab5[Module 5: MLOps Admin & Compliance]
-
-    Tab1 --> M1[Input Form, Calibrated Default Probability, FICO Gauge 300-850]
-    Tab2 --> M2[TreeSHAP Waterfall, Top Feature Impact Table, Bivariate Dependence]
-    Tab3 --> M3[CRO Policy Slider, Plotly Bullet Chart vs Policy, Regime Analysis]
-    Tab4 --> M4[6 Heuristic Levers, 12-Month Recovery Trajectory, DiCE Counterfactuals]
-    Tab5 --> M5[Fairlearn Disparate Impact Audit, Evidently AI Drift Report, PDF Export]
+flowchart LR
+    App["<b>OpacGuard Core</b><br/>Decision Engine"] --> M1["<b>Module 1: Credit Risk Scoring</b><br/>• Interactive Applicant Input Form<br/>• Calibrated Default Probability P(Default)<br/>• Real-Time FICO Gauge Chart (300–850)"]
+    App --> M2["<b>Module 2: SHAP Attribution</b><br/>• Local Applicant Waterfall Plots<br/>• Top Feature Impact Rankings<br/>• Bivariate SHAP Dependence Plots"]
+    App --> M3["<b>Module 3: Policy Simulator</b><br/>• CRO Dynamic Risk Tolerance Slider<br/>• Real-Time Plotly Bullet Chart vs Policy<br/>• Risk Regime (Conservative / Growth / Lax)"]
+    App --> M4["<b>Module 4: Actionable Recourse</b><br/>• 6 Financial Optimization Heuristics<br/>• 12-Month Score Recovery Trajectory<br/>• Downloadable Adverse Action Plan (.TXT)<br/>• Exact DiCE Mathematical Counterfactuals"]
+    App --> M5["<b>Module 5: MLOps & Governance</b><br/>• Fairlearn Disparate Impact Audit Report<br/>• Evidently AI Macroeconomic Drift Report<br/>• Exportable SHAP PDF & Telemetry Data"]
 ```
 
 ---
@@ -362,14 +369,20 @@ OpacGuard is engineered for zero-cold-start cloud deployment:
 
 ---
 
-## 👥 Authors & Research Team
+## 👥 Research Team & Authorship Contributions
 
-* **Aditya Sanjay Manjalkar** — *Lead Researcher & Architect* | [Email](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in)
-* **Chirag Ashok Mendon** — *Co-Author & XAI / Governance Specialist* | [Email](mailto:chiragmendon-cmpn@atharvacoe.ac.in)
-* **Chaitanya Rajesh Lade** — *Co-Author & Modeling / Benchmark Specialist* | [Email](mailto:chaitanyalade-cmpn@atharvacoe.ac.in)
-* **Prof. Shweta Sharma** — *Research Supervisor & Assistant Professor* | [Email](mailto:shwetasharma@atharvacoe.ac.in)
+This research and software framework was designed and executed at the Department of Computer Engineering, Atharva College of Engineering, University of Mumbai. In accordance with standard academic contributor taxonomies (CRediT):
 
-**Department of Computer Engineering, Atharva College of Engineering, University of Mumbai, Maharashtra, India**
+| Author | Academic & Engineering Role | Individual Research & Implementation Contributions |
+| :--- | :--- | :--- |
+| **Aditya Sanjay Manjalkar** | **Lead Project Architect & First Author**<br>*(Primary System Developer)* | • **Principal Architecture:** Conceived, designed, and developed the end-to-end OpacGuard framework.<br>• **Machine Learning Engineering:** Designed custom preprocessing transformers, built the 5-fold cross-validated XGBoost pipeline, and engineered asymmetric cost-sensitive threshold tuning (θ = 0.35) for optimal default recall.<br>• **XAI & Recourse Systems:** Implemented the TreeSHAP explainability engine, heuristic optimization levers, and DiCE-ML mathematical counterfactual generator.<br>• **Cloud Deployment:** Designed and built the multi-tab interactive decision platform deployed on Streamlit Cloud.<br>• **Manuscript:** Primary author of the peer-reviewed research paper presented at ICSTEMSD-2026 and published in IJTE (Vol. 49). |
+| **Prof. Shweta Sharma** | **Faculty Research Supervisor**<br>*(Assistant Professor)* | • **Research Supervision:** Provided primary academic mentorship, methodology validation, and project oversight.<br>• **Regulatory Standards:** Advised on algorithmic fairness criteria (EEOC Four-Fifths compliance) and financial compliance frameworks.<br>• **Manuscript Editing:** Guided research paper preparation, peer-review revisions, and journal publication submission. |
+| **Chirag Ashok Mendon** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Literature Survey:** Assisted with research on regulatory credit standards and bias mitigation literature.<br>• **Testing & Validation:** Supported experimental validation runs for Fairlearn auditing and Evidently AI drift pipelines.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+| **Chaitanya Rajesh Lade** | **Contributing Co-Author**<br>*(Research Assistant)* | • **Benchmarking Support:** Assisted in executing baseline comparative model runs (Decision Tree, Logistic Regression).<br>• **Data Verification:** Supported data validation checks, metric recording, and cross-validation score tabulations.<br>• **Editorial:** Assisted in paper review, formatting, and presentation preparation. |
+
+> **Contact & Correspondence:**
+> * **Aditya Sanjay Manjalkar (Lead Author):** [adityamanjalkar-cmpn@atharvacoe.ac.in](mailto:adityamanjalkar-cmpn@atharvacoe.ac.in)
+> * **Prof. Shweta Sharma (Research Supervisor):** [shwetasharma@atharvacoe.ac.in](mailto:shwetasharma@atharvacoe.ac.in)
 
 ---
 
